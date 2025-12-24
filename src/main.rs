@@ -68,7 +68,7 @@ fn l1_data_cache_size() -> usize {
             && let Ok(value) = ctl.value()
             && let Ok(size) = value.into_s64()
         {
-            size as usize
+            return size as usize;
         }
     }
     panic!("unable to determine L1 data cache size");
