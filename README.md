@@ -17,6 +17,8 @@ python3 check.py
 For example, on my machine with an AMD Ryzen 9 9950X CPU:
 
 ```
-$ tail -1 check.py
+$ tail -3 check.py
+check(184, "001101ac", "001bce77")  # found after 820.286969928s
+check(185, "002cb3ba", "003e9c7f")  # found after 4125.813191315s
 check(186, "003b668c", "004347a2")  # found after 4798.76804938s
 ```
