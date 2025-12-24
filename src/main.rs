@@ -55,6 +55,7 @@ fn main() {
         let hash = Uint256::sha256(i);
         if let Some((agree, j)) = hashes
             .par_iter()
+            .with_min_len(1024)
             .enumerate()
             .map(|(j, &other)| ((other ^ hash).count_zeros(), j as Input))
             .max_by_key(|&(agree, _)| agree)
