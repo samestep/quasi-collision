@@ -19,15 +19,22 @@
       let
         pkgs = import nixpkgs {
           inherit system;
+          config.allowUnfree = true;
           overlays = [ (import rust-overlay) ];
         };
       in
       {
-        devShells.default = pkgs.mkShellNoCC {
+        devShells.default = pkgs.mkShell {
           buildInputs = [
             pkgs.python3
             pkgs.rust-bin.stable.latest.default
+          ]
+          ++ pkgs.lib.optionals pkgs.stdenv.isLinux [
+            pkgs.cudaPackages.cudatoolkit
           ];
+          shellHook = pkgs.lib.optionalString pkgs.stdenv.isLinux ''
+            export LD_LIBRARY_PATH="${pkgs.addDriverRunpath.driverLink}/lib:$LD_LIBRARY_PATH"
+          '';
         };
       }
     );
