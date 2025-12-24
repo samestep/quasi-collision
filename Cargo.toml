@@ -1,0 +1,9 @@
+[package]
+name = "quasi-collision"
+version = "0.0.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+rayon = "1"
+sha2 = "0.10"
