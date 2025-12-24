@@ -1,6 +1,6 @@
 use rayon::prelude::*;
 use sha2::{Digest, Sha256};
-use std::{fmt, ops::BitXor, time::Instant};
+use std::{ops::BitXor, time::Instant};
 
 type Input = u32;
 
@@ -22,12 +22,6 @@ impl Uint256 {
 
     fn count_zeros(self) -> u32 {
         self.hi.count_zeros() + self.lo.count_zeros()
-    }
-}
-
-impl fmt::LowerHex for Uint256 {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, "{:032x}{:032x}", self.hi, self.lo)
     }
 }
 
