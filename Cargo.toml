@@ -5,5 +5,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-rayon = "1"
+cache-size = "0.7"
+libc = "0.2"
 sha2 = "0.10"
+sysctl = "0.7"

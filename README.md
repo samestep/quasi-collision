@@ -24,31 +24,30 @@ def check(c, s, t):
     a = sha256(bytes.fromhex(s)).digest()
     b = sha256(bytes.fromhex(t)).digest()
     assert c == sum((x ^ y ^ 0xff).bit_count() for (x, y) in zip(a, b))
-check(125, "00000000", "00000001")  # found after 726.991µs
-check(135, "00000002", "00000003")  # found after 733.223µs
-check(137, "00000002", "00000005")  # found after 736.86µs
-check(138, "00000000", "00000007")  # found after 737.892µs
-check(149, "00000004", "00000008")  # found after 738.513µs
-check(151, "00000005", "0000000c")  # found after 739.585µs
-check(158, "0000001a", "00000022")  # found after 743.693µs
-check(161, "00000027", "000000bc")  # found after 828.613µs
-check(163, "000000be", "00000240")  # found after 1.431009ms
-check(164, "00000245", "0000024b")  # found after 1.457579ms
-check(166, "0000007a", "00000299")  # found after 1.704865ms
-check(167, "000000ef", "00000630")  # found after 5.811881ms
-check(169, "000002f9", "000009d8")  # found after 17.49308ms
-check(174, "00001e40", "00001faf")  # found after 159.083325ms
-check(175, "000019af", "000053e2")  # found after 543.933933ms
-check(176, "00005355", "0000b38e")  # found after 1.291938446s
-check(177, "0000c367", "000116e2")  # found after 2.199669859s
-check(178, "00019300", "0001b012")  # found after 4.079794687s
-check(179, "0001b86e", "00033e15")  # found after 11.431695326s
-check(180, "000445a9", "00050022")  # found after 22.621640663s
-check(181, "00045991", "0005137f")  # found after 23.258178258s
-check(183, "0004733a", "000611c7")  # found after 31.055611575s
-check(184, "001101ac", "001bce77")  # found after 479.011581654s
-check(185, "002cb3ba", "003e9c7f")  # found after 3706.773646322s
-check(186, "003b668c", "004347a2")  # found after 4386.02443906s
+check(121, "00000000", "00000300")  # found after 150.66µs
+check(122, "00000001", "00000300")  # found after 161.74µs
+check(138, "00000003", "00000300")  # found after 163.103µs
+check(145, "00000004", "00000300")  # found after 163.744µs
+check(148, "0000000f", "00000300")  # found after 164.515µs
+check(150, "000000fe", "00000300")  # found after 168.593µs
+check(152, "00000220", "00000300")  # found after 180.755µs
+check(156, "000000e9", "00000301")  # found after 186.566µs
+check(157, "000003bb", "00000600")  # found after 191.075µs
+check(161, "00000120", "00000308")  # found after 201.694µs
+check(162, "000005e3", "00000622")  # found after 273.488µs
+check(165, "000014ce", "00001509")  # found after 284.849µs
+check(166, "00001813", "00001b2a")  # found after 453.161µs
+check(167, "00000742", "000009f1")  # found after 2.905064ms
+check(169, "0000257b", "000027b1")  # found after 2.909783ms
+check(172, "00002f4b", "0000391e")  # found after 11.992639ms
+check(174, "00005752", "00007956")  # found after 35.81772ms
+check(175, "000019af", "000053e2")  # found after 62.943078ms
+check(176, "00005355", "0000b38e")  # found after 103.847824ms
+check(177, "000003b9", "00025d26")  # found after 692.674698ms
+check(178, "00004f34", "000781f3")  # found after 2.042179562s
+check(184, "00004ecb", "0023844b")  # found after 10.040578189s
+check(185, "0000263a", "06c4372e")  # found after 475.72713249s
+check(186, "00002f8e", "091d261c")  # found after 665.747762513s
 ```
 
 ## GPU

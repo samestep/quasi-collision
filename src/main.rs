@@ -1,6 +1,14 @@
-use rayon::prelude::*;
 use sha2::{Digest, Sha256};
-use std::{ops::BitXor, time::Instant};
+use std::{
+    ops::BitXor,
+    sync::{
+        Arc,
+        atomic::{AtomicU32, Ordering},
+        mpsc,
+    },
+    thread,
+    time::Instant,
+};
 
 type Input = u32;
 
@@ -44,27 +52,78 @@ def check(c, s, t):
     assert c == sum((x ^ y ^ 0xff).bit_count() for (x, y) in zip(a, b))
 ";
 
-const WIDTH: usize = (Input::BITS / 4) as usize;
+const PAD: usize = (Input::BITS / 4) as usize;
+
+fn l1_data_cache_size() -> usize {
+    #[cfg(target_arch = "x86_64")]
+    {
+        if let Some(size) = cache_size::l1_cache_size() {
+            return size;
+        }
+    }
+    #[cfg(target_os = "macos")]
+    {
+        use sysctl::Sysctl;
+        if let Ok(ctl) = sysctl::Ctl::new("hw.l1dcachesize")
+            && let Ok(value) = ctl.value()
+            && let Ok(size) = value.into_s64()
+        {
+            size as usize
+        }
+    }
+    panic!("unable to determine L1 data cache size");
+}
 
 fn main() {
     println!("{}", PREFIX.trim());
-    let mut max_agree = 0;
-    let mut hashes = Vec::<Uint256>::new();
-    let start = Instant::now();
-    for i in 0..=Input::MAX {
-        let hash = Uint256::sha256(i);
-        if let Some((agree, j)) = hashes
-            .par_iter()
-            .with_min_len(1024)
-            .enumerate()
-            .map(|(j, &other)| ((other ^ hash).count_zeros(), j as Input))
-            .max_by_key(|&(agree, _)| agree)
-            && agree > max_agree
-        {
-            let t = start.elapsed();
-            println!("check({agree}, \"{j:0WIDTH$x}\", \"{i:0WIDTH$x}\")  # found after {t:?}");
-            max_agree = agree;
+    let threads = thread::available_parallelism().unwrap().get();
+    let elements = (l1_data_cache_size() / 2) / size_of::<Uint256>();
+    let best = Arc::new(AtomicU32::new(0));
+    let (tx, rx) = mpsc::channel::<(u32, Input, Input)>();
+    let began = Instant::now();
+    let mut handles = Vec::from_iter((0..threads).map(|thread| {
+        let best = Arc::clone(&best);
+        let tx = tx.clone();
+        thread::spawn(move || {
+            let mut start = thread * elements;
+            loop {
+                let Ok(mut i) = Input::try_from(start + elements) else {
+                    break;
+                };
+                let hashes = Vec::from_iter(((start as Input)..i).map(Uint256::sha256));
+                loop {
+                    let hash = Uint256::sha256(i);
+                    let max_agree = best.load(Ordering::Relaxed);
+                    for (j, &other) in hashes.iter().enumerate() {
+                        let agree = (other ^ hash).count_zeros();
+                        if agree > max_agree {
+                            tx.send((agree, i, (start + j) as Input)).unwrap();
+                        }
+                    }
+                    match i.checked_add(1) {
+                        Some(next) => i = next,
+                        None => break,
+                    }
+                }
+                start += threads * elements;
+            }
+        })
+    }));
+    handles.push(thread::spawn({
+        let best = Arc::clone(&best);
+        move || {
+            let mut max_agree = 0;
+            while let Ok((agree, i, j)) = rx.recv() {
+                if agree > max_agree {
+                    max_agree = agree;
+                    best.store(max_agree, Ordering::SeqCst);
+                    let t = began.elapsed();
+                    println!("check({agree}, \"{j:0PAD$x}\", \"{i:0PAD$x}\")  # found after {t:?}");
+                }
+            }
         }
-        hashes.push(hash);
+    }));
+    for handle in handles {
+        let _ = handle.join();
     }
 }
